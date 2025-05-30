@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Wipe Text Animation</title>
+  <style>
+    body {
+      background-color: black;
+      color: #00ff00;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      white-space: pre;
+      overflow: hidden;
+    }
+
+    .text-line {
+      opacity: 0;
+      transform: translateX(-100%);
+      animation: wipeIn 0.6s forwards;
+    }
+
+    @keyframes wipeIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="text-container"></div>
+
+  <script>
+    const lines = 
+      "\nHilangkan kebiasaan buruk menceritakan Orang",
+      "lain. Kita gak tau ucapan mana yg akan kembali",
+      "kepada kita. Dunia itu berputar jadilah tinggi",
+      "Tanpa merendahkan orang lain\n",
+      "\n6dwnn__"
+    ];
+
+    const container = document.getElementById('text-container');
+
+    lines.forEach((line, i) => {
+      const div = document.createElement('div');
+      div.textContent = line;
+      div.className = 'text-line';
+      div.style.animationDelay = `${i * 0.5}s`;
+      container.appendChild(div);
+    });
+  </script>
+
+</body>
+</html>
