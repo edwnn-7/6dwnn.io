@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Terminal</title>
+  <title>Terminal Wipe</title>
   <style>
     body {
       background-color: black;
@@ -13,20 +13,55 @@
       align-items: center;
       height: 100vh;
       flex-direction: column;
-      white-space: pre-wrap;
-      text-align: center;
+      overflow: hidden;
+    }
+
+    .line {
+      opacity: 0;
+      white-space: pre;
+      overflow: hidden;
+      border-right: 0.15em solid #00ff00;
+      animation: typing 2s steps(40, end) forwards, blink 0.75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0; opacity: 1; }
+      to { width: 100%; opacity: 1; }
+    }
+
+    @keyframes blink {
+      from, to { border-color: transparent; }
+      50% { border-color: #00ff00; }
     }
   </style>
 </head>
 <body>
-  <div>
-    <p>if  &gt; social_thrust.</p>
-    <br />
-    <p>Hilangkan kebiasaan buruk menceritakan Orang lain.</p>
-    <p>Kita gak tau ucapan mana yg akan kembali kepada kita.</p>
-    <p>Dunia itu berputar, jadilah tinggi tanpa merendahkan orang lain.</p>
-    <br />
-    <p>6dwnn/</p>
-  </div>
+  <div id="terminal"></div>
+
+  <script>
+    const lines = [
+      "if  > social_thrust.\n",
+      "\nHilangkan kebiasaan buruk menceritakan Orang lain.",
+      "Kita gak tau ucapan mana yg akan kembali kepada kita.",
+      "Dunia itu berputar jadilah tinggi",
+      "Tanpa merendahkan orang lain\n",
+      "6dwnn/"
+    ];
+
+    const terminal = document.getElementById("terminal");
+
+    function typeLine(line, delay) {
+      setTimeout(() => {
+        const div = document.createElement("div");
+        div.className = "line";
+        div.textContent = line;
+        terminal.appendChild(div);
+      }, delay);
+    }
+
+    lines.forEach((line, i) => {
+      typeLine(line, i * 2500); // delay tiap baris 2.5s
+    });
+  </script>
 </body>
 </html>
