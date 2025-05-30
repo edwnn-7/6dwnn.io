@@ -2,67 +2,145 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Terminal Wipe</title>
+  <title>Wipe Teks Glitz</title>
   <style>
-    body {
-      background-color: black;
-      color: #00ff00;
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
       font-family: monospace;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
+      color: #00ff00;
       overflow: hidden;
+      height: 100%;
     }
 
-    .line {
+    .glitch-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(0, 255, 0, 0.03),
+        rgba(0, 255, 0, 0.03) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      z-index: 2;
+      animation: glitchLines 2s linear infinite;
+    }
+
+    @keyframes glitchLines {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100px; }
+    }
+
+    .matrix {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0.05;
+      z-index: 0;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .terminal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 16px;
+      white-space: pre-wrap;
+      z-index: 1;
+      color: #00ff00;
+    }
+
+    .char {
       opacity: 0;
-      white-space: pre;
-      overflow: hidden;
-      border-right: 0.15em solid #00ff00;
-      animation: typing 2s steps(40, end) forwards, blink 0.75s step-end infinite;
+      display: inline-block;
+      animation: fadeIn 0.05s forwards;
     }
 
-    @keyframes typing {
-      from { width: 0; opacity: 1; }
-      to { width: 100%; opacity: 1; }
-    }
-
-    @keyframes blink {
-      from, to { border-color: transparent; }
-      50% { border-color: #00ff00; }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="terminal"></div>
+  <!-- Matrix background -->
+  <div class="matrix">
+    <canvas id="matrixCanvas"></canvas>
+  </div>
+
+  <!-- Glitch overlay -->
+  <div class="glitch-overlay"></div>
+
+  <!-- Terminal teks -->
+  <div class="terminal" id="textTarget"></div>
 
   <script>
-    const lines = [
-      "> social_thrust.\n",
+    // Matrix background effect
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
 
-
-      "\nHilangkan kebiasaan buruk menceritakan Orang lain
-      Kita gak tau ucapan mana yg akan kembali kepada kita.",
-  "Dunia itu berputar jadilah tinggi Tanpa merendahkan orang lain\n",
-                          
-                    "6dwnn/"
-    ];
-
-    const terminal = document.getElementById("terminal");
-
-    function typeLine(line, delay) {
-      setTimeout(() => {
-        const div = document.createElement("div");
-        div.className = "line";
-        div.textContent = line;
-        terminal.appendChild(div);
-      }, delay);
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
 
-    lines.forEach((line, i) => {
-      typeLine(line, i * 2500); // delay tiap baris 2.5s
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const letters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array.from({ length: columns }).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 50);
+
+    // Teks ketik satu-satu
+    const text = `if  > social_thrust.
+
+Hilangkan kebiasaan buruk menceritakan Orang lain.
+Kita gak tau ucapan mana yg akan kembali kepada kita.
+Dunia itu berputar jadilah tinggi
+Tanpa merendahkan orang lain
+
+6dwnn/`;
+
+    const container = document.getElementById("textTarget");
+    let delay = 0;
+
+    text.split("").forEach((char, index) => {
+      const span = document.createElement("span");
+      span.textContent = char;
+      span.className = "char";
+      span.style.animationDelay = `${delay}s`;
+      container.appendChild(span);
+      delay += 0.03; // Durasi antar huruf
     });
   </script>
 </body>
