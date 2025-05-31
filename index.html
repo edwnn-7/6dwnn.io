@@ -61,87 +61,218 @@
     .char {
       opacity: 0;
       display: inline-block;
-      animation: fadeIn 0.05s forwards;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cyber Glitz Terminal</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+      color: #00ff00;
     }
 
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+    canvas#staticCanvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .glitch-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(0, 255, 0, 0.015),
+        rgba(0, 255, 0, 0.015) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      z-index: 1;
+      animation: glitchLines 2s linear infinite;
+    }
+
+    @keyframes glitchLines {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100px; }
+    }
+
+    .motivasi {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      white-space: pre-wrap;
+      text-align: center;
+      font-size: 24px;
+      z-index: 2;
+      color: #00ff00;
+    }
+
+    .char {
+      opacity: 0;
+      display: inline-block;
+      animation: wipeFade 0.05s forwards;
+    }
+
+    @keyframes wipeFade {
+      to { opacity: 1; }
+    }
+
+    .glitch-char {
+      animation: glitchText 1.5s infinite;
+    }
+
+    @keyframes glitchText {
+      0% { transform: translate(0, 0); opacity: 1; }
+      20% { transform: translate(-0.5px, 0.5px); }
+      40% { transform: translate(0.5px, -0.5px); }
+      60% { transform: translate(-0.5px, -0.5px); }
+      80% { transform: translate(0.5px, 0.5px); opacity: 0.95; }
+      100% { transform: translate(0, 0); opacity: 1; }
+    }
+
+    .terminal-cursor {
+      display: inline-block;
+      margin-left: 4px;
+      animation: blink 1s step-end infinite;
+      color: #00ff00;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .signature {
+      position: absolute;
+      bottom: 20px;
+      right: 30px;
+      font-size: 36px;
+      font-weight: bold;
+      color: #00ff00;
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    .signature span {
+      opacity: 0;
+      display: inline-block;
+      animation: digitalGlitch 2s infinite;
+    }
+
+    @keyframes digitalGlitch {
+      0%, 100% { transform: translate(0px, 0px); }
+      33% { transform: translate(-0.5px, 0.5px); }
+      66% { transform: translate(0.5px, -0.5px); }
     }
   </style>
 </head>
 <body>
-  <!-- Matrix background -->
-  <div class="matrix">
-    <canvas id="matrixCanvas"></canvas>
-  </div>
 
-  <!-- Glitch overlay -->
+  <!-- Static noise -->
+  <canvas id="staticCanvas"></canvas>
+
+  <!-- Glitch lines -->
   <div class="glitch-overlay"></div>
 
-  <!-- Terminal teks -->
-  <div class="terminal" id="textTarget"></div>
+  <!-- Motivational text -->
+  <div class="motivasi" id="motivasiText">
+    <span id="typedText"></span><span class="terminal-cursor">_</span>
+  </div>
+
+  <!-- Signature name -->
+  <div class="signature" id="signatureText"></div>
 
   <script>
-    // Matrix background effect
-    const canvas = document.getElementById('matrixCanvas');
-    const ctx = canvas.getContext('2d');
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const letters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = Array.from({ length: columns }).fill(1);
-
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#0F0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-
-    setInterval(drawMatrix, 50);
-
-    // Teks ketik satu-satu
-    const text = `if  > social_thrust.
-
-Hilangkan kebiasaan buruk menceritakan Orang lain.
+    // TEXT MOTIVASI - WIPE + GLITCH + CURSOR
+    const text = `Hilangkan kebiasaan buruk menceritakan orang lain.
 Kita gak tau ucapan mana yg akan kembali kepada kita.
-Dunia itu berputar jadilah tinggi
-Tanpa merendahkan orang lain
+Dunia itu berputar, jadilah tinggi
+tanpa merendahkan orang lain.`;
 
-6dwnn/`;
-
-    const container = document.getElementById("textTarget");
+    const container = document.getElementById("typedText");
     let delay = 0;
 
-    text.split("").forEach((char, index) => {
+    text.split("").forEach(char => {
       const span = document.createElement("span");
       span.textContent = char;
-      span.className = "char";
-      span.style.animationDelay = `${delay}s`;
+      span.classList.add("char", "glitch-char");
+      span.style.animationDelay = delay + "s";
       container.appendChild(span);
-      delay += 0.03; // Durasi antar huruf
+      delay += 0.03;
     });
+
+    // SIGNATURE NAME - WIPE KANAN-KIRI LAMBAT + GLITCH
+    const signatureTextStr = "77/edwnn_";
+    const signatureEl = document.getElementById("signatureText");
+
+    function animateSignature() {
+      signatureEl.innerHTML = "";
+      const spans = signatureTextStr.split("").map((char, i) => {
+        const span = document.createElement("span");
+        span.textContent = char;
+        span.style.animationDelay = (Math.random() * 2).toFixed(2) + "s";
+        signatureEl.appendChild(span);
+        return span;
+      });
+
+      // Wipe In
+      spans.forEach((span, i) => {
+        setTimeout(() => {
+          span.style.opacity = 1;
+        }, i * 200);
+      });
+
+      // Wipe Out
+      setTimeout(() => {
+        spans.slice().reverse().forEach((span, i) => {
+          setTimeout(() => {
+            span.style.opacity = 0;
+          }, i * 200);
+        });
+      }, signatureTextStr.length * 200 + 3000);
+
+      // Loop
+      setTimeout(animateSignature, signatureTextStr.length * 400 + 3000);
+    }
+
+    animateSignature();
+
+    // STATIC CANVAS EFFECT
+    const staticCanvas = document.getElementById("staticCanvas");
+    const ctx = staticCanvas.getContext("2d");
+
+    function resizeCanvas() {
+      staticCanvas.width = window.innerWidth;
+      staticCanvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function drawStatic() {
+      const imageData = ctx.createImageData(staticCanvas.width, staticCanvas.height);
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        const shade = Math.random() * 255;
+        imageData.data[i] = shade;
+        imageData.data[i + 1] = shade;
+        imageData.data[i + 2] = shade;
+        imageData.data[i + 3] = Math.random() * 20;
+      }
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    setInterval(drawStatic, 60);
   </script>
+
 </body>
 </html>
